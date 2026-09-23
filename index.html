@@ -137,7 +137,6 @@
         form.addEventListener('submit', function(e) {
             e.preventDefault();
 
-            // Validación básica
             const nombre = document.getElementById('nombre').value.trim();
             const apellido = document.getElementById('apellido').value.trim();
             const sexo = document.getElementById('sexo').value;
@@ -151,18 +150,19 @@
             btnEnviar.innerText = 'Enviando...';
             mensajeDiv.style.display = 'none';
 
-            // Estructura que espera KoboToolbox en la API v2
+            // Estructura que espera KoboToolbox
             const payload = {
                 "NOMBRE": nombre,
                 "APELLIDO": apellido,
                 "SEXO": sexo
             };
 
-            // Enviar a Google Apps Script
+            // ¡CAMBIO IMPORTANTE AQUÍ!
+            // Usamos 'text/plain' para evitar el error de CORS (preflight)
             fetch(WEB_APP_URL, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'text/plain;charset=utf-8'
                 },
                 body: JSON.stringify(payload)
             })
