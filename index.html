@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registro de Dispositivos</title>
+<style>
+  :root{
+    --bg-1:#070b16;
+    --bg-2:#111a2e;
+    --card:rgba(255,255,255,.055);
+    --card-border:rgba(255,255,255,.14);
+    --txt:#eaf1ff;
+    --txt-muted:#9aacc9;
+    --accent:#38bdf8;
+    --accent-2:#a78bfa;
+    --ok:#34d399;
+    --err:#f87171;
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; }
+
+  body{
+    margin:0;
+    min-height:100vh;
+    padding:24px;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    color:var(--txt);
+    background:
+      radial-gradient(1200px 800px at 15% 10%, #16233f 0%, transparent 60%),
+      radial-gradient(1000px 700px at 85% 90%, #1d1636 0%, transparent 60%),
+      linear-gradient(160deg, var(--bg-1), var(--bg-2));
+    background-attachment:fixed;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow-x:hidden;
+  }
+
+  /* ---------- ICONOS FLOTANTES DE FONDO ---------- */
+  .capa-iconos{
+    position:fixed;
+    inset:0;
+    overflow:hidden;
+    pointer-events:none;
+    z-index:0;
+  }
+  .capa-iconos span{
+    position:absolute;
+    bottom:-14vh;
+    opacity:0;
+    line-height:1;
+    animation-name:flotar;
+    animation-timing-function:linear;
+    animation-iteration-count:infinite;
+    filter:drop-shadow(0 0 12px rgba(56,189,248,.35));
+    user-select:none;
+  }
+  @keyframes flotar{
+    0%   { transform:translateY(0) rotate(0deg) scale(1);      opacity:0; }
+    12%  { opacity:var(--op,.35); }
+    88%  { opacity:var(--op,.35); }
+    100% { transform:translateY(-122vh) rotate(360deg) scale(1.2); opacity:0; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .capa-iconos span{ animation:none; display:none; }
+  }
+
+  /* ---------- TARJETA ---------- */
+  .tarjeta-formulario{
+    position:relative;
+    z-index:1;
+    width:100%;
+    max-width:430px;
+    padding:34px 30px 30px;
+    border-radius:22px;
+    background:var(--card);
+    border:1px solid var(--card-border);
+    backdrop-filter:blur(18px) saturate(140%);
+    -webkit-backdrop-filter:blur(18px) saturate(140%);
+    box-shadow:
+      0 24px 60px rgba(0,0,0,.55),
+      inset 0 1px 0 rgba(255,255,255,.09);
+  }
+
+  .chip{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-size:11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    font-weight:700;
+    color:#bae6fd;
+    background:rgba(56,189,248,.12);
+    border:1px solid rgba(56,189,248,.35);
+    padding:5px 11px;
+    border-radius:999px;
+    margin-bottom:16px;
+  }
+  .chip::before{
+    content:"";
+    width:7px; height:7px;
+    border-radius:50%;
+    background:var(--ok);
+    box-shadow:0 0 10px var(--ok);
+  }
+
+  /* ====== TÍTULO MODIFICADO ====== */
+  h2{
+    margin:0 0 6px;
+    font-size:25px;
+    line-height:1.2;
+    letter-spacing:-.02em;
+    background:linear-gradient(100deg,#ffffff 0%, var(--accent) 55%, var(--accent-2) 100%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  .subtitulo{
+    margin:0 0 26px;
+    font-size:13.5px;
+    color:var(--txt-muted);
+    line-height:1.5;
+  }
+
+  /* ---------- CAMPOS ---------- */
+  .campo{ margin-bottom:18px; }
+
+  label{
+    display:block;
+    margin-bottom:8px;
+    font-size:11.5px;
+    font-weight:700;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:#8fd6ff;
+  }
+
+  .control{
+    position:relative;
+    display:flex;
+    align-items:center;
+  }
+  .control .icono{
+    position:absolute;
+    left:13px;
+    font-size:15px;
+    opacity:.75;
+    pointer-events:none;
+    transition:opacity .2s, transform .2s;
+  }
+
+  input, select{
+    width:100%;
+    padding:13px 14px 13px 42px;
+    font-size:15px;
+    font-family:inherit;
+    color:var(--txt);
+    background:rgba(4,10,22,.55);
+    border:1px solid rgba(255,255,255,.15);
+    border-radius:12px;
+    outline:none;
+    transition:border-color .2s, box-shadow .2s, background .2s;
+  }
+  input::placeholder{ color:#6d7f9c; }
+
+  input:hover, select:hover{ border-color:rgba(255,255,255,.28); }
+
+  input:focus, select:focus{
+    background:rgba(4,10,22,.8);
+    border-color:var(--accent);
+    box-shadow:0 0 0 4px rgba(56,189,248,.16);
+  }
+  .control:focus-within .icono{
+    opacity:1;
+    transform:scale(1.12);
+  }
+
+  select{
+    appearance:none;
+    -webkit-appearance:none;
+    cursor:pointer;
+    background-image:
+      linear-gradient(45deg, transparent 50%, #8fd6ff 50%),
+      linear-gradient(135deg, #8fd6ff 50%, transparent 50%);
+    background-position:calc(100% - 20px) 50%, calc(100% - 14px) 50%;
+    background-size:6px 6px, 6px 6px;
+    background-repeat:no-repeat;
+  }
+  select option{ background:#0d1626; color:#eaf1ff; }
+
+  /* ---------- BOTÓN ---------- */
+  button{
+    width:100%;
+    margin-top:8px;
+    padding:14px;
+    font-size:15.5px;
+    font-weight:700;
+    font-family:inherit;
+    letter-spacing:.02em;
+    color:#04121f;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+    background:linear-gradient(100deg, var(--accent), var(--accent-2));
+    box-shadow:0 10px 26px rgba(56,189,248,.28);
+    transition:transform .15s, box-shadow .2s, filter .2s;
+  }
+  button:hover:not(:disabled){
+    transform:translateY(-2px);
+    filter:brightness(1.08);
+    box-shadow:0 16px 34px rgba(56,189,248,.38);
+  }
+  button:active:not(:disabled){ transform:translateY(0); }
+  button:disabled{
+    cursor:not-allowed;
+    filter:grayscale(.35) brightness(.85);
+    box-shadow:none;
+  }
+
+  /* ---------- AVISO (toast) ---------- */
+  .aviso{
+    position:fixed;
+    left:50%;
+    bottom:28px;
+    transform:translate(-50%, 140%);
+    z-index:50;
+    max-width:90vw;
+    padding:13px 20px;
+    border-radius:12px;
+    font-size:14px;
+    font-weight:600;
+    color:#04121f;
+    background:var(--ok);
+    box-shadow:0 14px 34px rgba(0,0,0,.5);
+    transition:transform .35s cubic-bezier(.2,.9,.3,1.3);
+  }
+  .aviso.visible{ transform:translate(-50%, 0); }
+  .aviso.error{ background:var(--err); color:#2a0505; }
+</style>
+</head>
+<body>
+
+  <!-- Iconos flotantes de fondo -->
+  <div class="capa-iconos" aria-hidden="true">
+    <span style="left:4%;  font-size:34px; animation-duration:19s; animation-delay:0s;    --op:.30;">📱</span>
+    <span style="left:12%; font-size:22px; animation-duration:26s; animation-delay:-6s;   --op:.22;">💾</span>
+    <span style="left:20%; font-size:28px; animation-duration:22s; animation-delay:-12s;  --op:.28;">📡</span>
+    <span style="left:29%; font-size:18px; animation-duration:30s; animation-delay:-3s;   --op:.20;">🔌</span>
+    <span style="left:37%; font-size:40px; animation-duration:24s; animation-delay:-17s;  --op:.16;">🖥️</span>
+    <span style="left:45%; font-size:20px; animation-duration:17s; animation-delay:-9s;   --op:.30;">⚙️</span>
+    <span style="left:53%; font-size:30px; animation-duration:28s; animation-delay:-21s;  --op:.22;">🔋</span>
+    <span style="left:61%; font-size:24px; animation-duration:21s; animation-delay:-5s;   --op:.26;">📶</span>
+    <span style="left:69%; font-size:36px; animation-duration:25s; animation-delay:-14s;  --op:.18;">💻</span>
+    <span style="left:77%; font-size:19px; animation-duration:18s; animation-delay:-2s;   --op:.32;">✨</span>
+    <span style="left:84%; font-size:27px; animation-duration:29s; animation-delay:-19s;  --op:.22;">🌐</span>
+    <span style="left:91%; font-size:32px; animation-duration:23s; animation-delay:-8s;   --op:.24;">🚀</span>
+    <span style="left:8%;  font-size:16px; animation-duration:33s; animation-delay:-24s;  --op:.20;">🔒</span>
+    <span style="left:33%; font-size:15px; animation-duration:35s; animation-delay:-11s;  --op:.18;">🧠</span>
+    <span style="left:65%; font-size:17px; animation-duration:31s; animation-delay:-27s;  --op:.20;">🎯</span>
+    <span style="left:88%; font-size:15px; animation-duration:36s; animation-delay:-15s;  --op:.18;">🛰️</span>
+  </div>
+
+  <!-- Tarjeta del formulario -->
+  <div class="tarjeta-formulario">
+    <span class="chip">Sistema activo</span>
+
+    <!-- ====== TÍTULO MODIFICADO ====== -->
+    <h2>RANDY ES GAY "AFIRMACION"</h2>
+    <p class="subtitulo">Completa los datos y pulsa enviar para guardarlos en la base de datos.</p>
+
+    <form id="customForm" novalidate>
+      <div class="campo">
+        <label for="nombre">Nombre</label>
+        <div class="control">
+          <span class="icono">👤</span>
+          <input type="text" id="nombre" name="nombre" placeholder="Escribe tu nombre" required>
+        </div>
+      </div>
+
+      <div class="campo">
+        <label for="apellido">Apellido</label>
+        <div class="control">
+          <span class="icono">🪪</span>
+          <input type="text" id="apellido" name="apellido" placeholder="Escribe tu apellido" required>
+        </div>
+      </div>
+
+      <div class="campo">
+        <label for="sexo">Sexo</label>
+        <div class="control">
+          <span class="icono">⚧</span>
+          <select id="sexo" name="sexo" required>
+            <option value="">Selecciona…</option>
+            <option value="masculino">Masculino</option>
+            <option value="femenino">Femenino</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+      </div>
+
+      <button type="submit" id="btnEnviar">Enviar datos</button>
+    </form>
+  </div>
+
+  <div class="aviso" id="aviso" role="status" aria-live="polite"></div>
+
+<script>
+  const avisoEl = document.getElementById('aviso');
+  let avisoTimer = null;
+
+  function mostrarAviso(texto, esError = false) {
+    avisoEl.textContent = texto;
+    avisoEl.classList.toggle('error', esError);
+    avisoEl.classList.add('visible');
+    clearTimeout(avisoTimer);
+    avisoTimer = setTimeout(() => avisoEl.classList.remove('visible'), 3200);
+  }
+
+  document.getElementById('customForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const btn = document.getElementById('btnEnviar');
+    const textoOriginal = btn.textContent;
+    btn.textContent = 'Enviando…';
+    btn.disabled = true;
+
+    // -------- CONFIGURA AQUÍ TU ENDPOINT Y TU TOKEN --------
+    const KOBO_UID   = '2M3N2o21';
+    const KOBO_TOKEN = '5293652fd9e3fde798ebeaadbeb34a4a3d159e35';   // Authorization: Token xxxxxxxxx
+    const koboUrl = `https://kf.kobotoolbox.org/api/v2/assets/${KOBO_UID}/submissions/`;
+
+    const datos = Object.fromEntries(new FormData(this).entries());
+
+    try {
+      const response = await fetch(koboUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Token ${KOBO_TOKEN}`
+        },
+        body: JSON.stringify(datos)
+      });
+
+      if (response.ok || response.status === 201) {
+        mostrarAviso('✅ ¡Datos guardados con éxito!');
+        this.reset();
+      } else {
+        mostrarAviso('⚠️ Error al guardar los datos (' + response.status + ')', true);
+      }
+    } catch (error) {
+      console.error('Error de red:', error);
+      mostrarAviso('❌ No se pudo conectar con el servidor', true);
+    } finally {
+      btn.textContent = textoOriginal;
+      btn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>
