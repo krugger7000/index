@@ -122,11 +122,11 @@
 
     <script>
         // CONFIGURACIÓN DE KOBO
-        const KOBO_UID  = 'aqzB9riFJ2PJrtN8iijwaS';
+        const KOBO_UID   = 'aqzB9riFJ2PJrtN8iijwaS';
+        const KOBO_TOKEN = '5293652fd9e3fde798ebeaadbeb34a4a3d159e35'; // <-- Pega tu token de Kobo aquí
+
         const targetUrl = `https://kf.kobotoolbox.org/api/v2/assets/${KOBO_UID}/submissions/`;
-        
-        // Proxy CORS para evitar bloqueos desde GitHub Pages o Localhost
-        const koboUrl = 'https://corsproxy.io/?' + encodeURIComponent(targetUrl);
+        const koboUrl   = 'https://corsproxy.io/?' + encodeURIComponent(targetUrl);
 
         const form = document.getElementById('koboForm');
         const mensajeDiv = document.getElementById('mensaje');
@@ -139,26 +139,25 @@
             btnEnviar.innerText = 'Enviando...';
             mensajeDiv.style.display = 'none';
 
-            // Estructura de payload que requiere Kobo API v2
-            // NOTA: Asegúrate de que las claves ("nombre", "apellido", "sexo") coincidenci con los 
-            // Nombres del Nombre de Columna XML en tu formulario de KoboToolbox.
+            // Nombres en MAYÚSCULAS coincidiendo con la columna de datos en Kobo
             const payload = {
                 submission: {
-                    "nombre": document.getElementById('nombre').value,
-                    "apellido": document.getElementById('apellido').value,
-                    "sexo": document.getElementById('sexo').value
+                    "NOMBRE": document.getElementById('nombre').value,
+                    "APELLIDO": document.getElementById('apellido').value,
+                    "SEXO": document.getElementById('sexo').value
                 }
             };
 
             fetch(koboUrl, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Token ' + KOBO_TOKEN
                 },
                 body: JSON.stringify(payload)
             })
             .then(response => {
-                if (response.ok) {
+                if (response.ok || response.status === 201) {
                     mostrarMensaje('¡Datos registrados con éxito!', 'exito');
                     form.reset();
                 } else {
